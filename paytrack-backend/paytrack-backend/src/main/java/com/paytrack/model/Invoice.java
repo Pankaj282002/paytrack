@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -41,6 +42,7 @@ public class Invoice {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<Payment> payments;
 
