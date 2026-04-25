@@ -1,5 +1,6 @@
 package com.paytrack.controller;
 
+import com.paytrack.dto.PaymentDTO;
 import com.paytrack.model.Invoice;
 import com.paytrack.model.Payment;
 import com.paytrack.service.InvoiceService;
@@ -25,9 +26,14 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<Payment> add(@PathVariable Long invoiceId,
-                                       @RequestBody Payment payment) {
+                                       @RequestBody PaymentDTO dto) {
         Invoice invoice = invoiceService.getById(invoiceId);
+        Payment payment = new Payment();
         payment.setInvoice(invoice);
+        payment.setPaidAmount(dto.getPaidAmount());
+        payment.setPaidDate(dto.getPaidDate());
+        payment.setPaymentMode(Payment.PaymentMode.valueOf(dto.getPaymentMode()));
+        payment.setNote(dto.getNote());
         return ResponseEntity.ok(paymentService.add(payment));
     }
 }

@@ -1,5 +1,6 @@
 package com.paytrack.controller;
 
+import com.paytrack.dto.InvoiceDTO;
 import com.paytrack.model.Invoice;
 import com.paytrack.model.User;
 import com.paytrack.repository.UserRepository;
@@ -31,10 +32,15 @@ public class InvoiceController {
     }
 
     @PostMapping
-    public ResponseEntity<Invoice> create(@RequestBody Invoice invoice,
+    public ResponseEntity<Invoice> create(@RequestBody InvoiceDTO dto,
                                           Authentication auth) {
         User user = getUser(auth);
+        Invoice invoice = new Invoice();
         invoice.setUser(user);
+        invoice.setClientName(dto.getClientName());
+        invoice.setClientEmail(dto.getClientEmail());
+        invoice.setAmount(dto.getAmount());
+        invoice.setDueDate(dto.getDueDate());
         return ResponseEntity.ok(invoiceService.create(invoice));
     }
 
@@ -45,7 +51,12 @@ public class InvoiceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Invoice> update(@PathVariable Long id,
-                                          @RequestBody Invoice invoice) {
+                                          @RequestBody InvoiceDTO dto) {
+        Invoice invoice = new Invoice();
+        invoice.setClientName(dto.getClientName());
+        invoice.setClientEmail(dto.getClientEmail());
+        invoice.setAmount(dto.getAmount());
+        invoice.setDueDate(dto.getDueDate());
         return ResponseEntity.ok(invoiceService.update(id, invoice));
     }
 
@@ -57,9 +68,10 @@ public class InvoiceController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<Invoice> updateStatus(@PathVariable Long id,
-                                                @RequestBody Invoice invoice) {
+                                                @RequestBody InvoiceDTO dto) {
         Invoice existing = invoiceService.getById(id);
-        existing.setStatus(invoice.getStatus());
+        existing.setStatus(Invoice.Status.valueOf(
+                dto.getStatus() != null ? dto.getStatus() : "PENDING"));
         return ResponseEntity.ok(invoiceService.update(id, existing));
     }
 }
