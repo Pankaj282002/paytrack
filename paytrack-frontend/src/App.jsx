@@ -5,6 +5,8 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import InvoiceList from './pages/InvoiceList'
 import InvoiceForm from './pages/InvoiceForm'
+import InvoiceDetail from './pages/InvoiceDetail'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -20,8 +22,8 @@ function App() {
           <Route path="/invoices" element={<InvoiceList />} />
           <Route path="/invoices/create" element={<InvoiceForm />} />
           <Route path="/invoices/:id/edit" element={<InvoiceForm />} />
-          <Route path="/invoices/:id" element={<h1>Invoice Detail</h1>} />
-          <Route path="/profile" element={<h1>Profile</h1>} />
+          <Route path="/invoices/:id" element={<InvoiceDetail />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>
