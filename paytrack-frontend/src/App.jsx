@@ -3,6 +3,8 @@ import PrivateRoute from './components/PrivateRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import InvoiceList from './pages/InvoiceList'
+import InvoiceForm from './pages/InvoiceForm'
 
 function App() {
   return (
@@ -15,10 +17,10 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/invoices" element={<h1>Invoice List</h1>} />
-          <Route path="/invoices/create" element={<h1>Create Invoice</h1>} />
+          <Route path="/invoices" element={<InvoiceList />} />
+          <Route path="/invoices/create" element={<InvoiceForm />} />
+          <Route path="/invoices/:id/edit" element={<InvoiceForm />} />
           <Route path="/invoices/:id" element={<h1>Invoice Detail</h1>} />
-          <Route path="/invoices/:id/edit" element={<h1>Edit Invoice</h1>} />
           <Route path="/profile" element={<h1>Profile</h1>} />
         </Route>
       </Routes>
