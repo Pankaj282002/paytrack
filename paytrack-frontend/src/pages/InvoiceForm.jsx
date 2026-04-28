@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
+import { FileText, LogOut, User, LayoutDashboard } from 'lucide-react'
 import api from '../services/api'
+import { removeToken } from '../services/auth'
 
 const InvoiceForm = () => {
   const { id } = useParams()
@@ -12,9 +14,15 @@ const InvoiceForm = () => {
     clientEmail: '',
     amount: '',
     dueDate: '',
-    status: 'PENDING'
+    status: 'PENDING',
+    currency: 'INR'
   })
   const [error, setError] = useState('')
+
+  const handleLogout = () => {
+    removeToken()
+    navigate('/login')
+  }
 
   useEffect(() => {
     if (isEdit) {
@@ -52,84 +60,129 @@ const InvoiceForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <Link to="/dashboard" className="text-xl font-bold text-blue-600">
-          PayTrack
+    <div className="min-h-screen bg-slate-50">
+      {/* Navbar */}
+      <nav className="bg-[#1E3A5F] px-8 py-4 flex justify-between items-center shadow-lg">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center">
+            <FileText size={15} className="text-[#1E3A5F]" />
+          </div>
+          <span className="text-white font-bold text-lg">PayTrack</span>
         </Link>
-        <Link to="/invoices" className="text-gray-600 hover:text-blue-600 text-sm">
-          Back to Invoices
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link to="/dashboard" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
+            <LayoutDashboard size={15} />
+            Dashboard
+          </Link>
+          <Link to="/invoices" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
+            <FileText size={15} />
+            Invoices
+          </Link>
+          <Link to="/profile" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
+            <User size={15} />
+            Profile
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-blue-200 hover:text-red-400 text-sm flex items-center gap-1 transition"
+          >
+            <LogOut size={15} />
+            Logout
+          </button>
+        </div>
       </nav>
 
-      <div className="max-w-xl mx-auto p-6">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-          {isEdit ? 'Edit Invoice' : 'Create Invoice'}
-        </h2>
+      <div className="max-w-2xl mx-auto p-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[#1E3A5F]">
+            {isEdit ? 'Edit Invoice' : 'Create Invoice'}
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            {isEdit ? 'Update invoice details below.' : 'Fill in the details to create a new invoice.'}
+          </p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl mb-6 text-sm">
             {error}
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-600 text-sm mb-1">Client Name</label>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Client Name</label>
               <input
                 type="text"
                 name="clientName"
                 value={form.clientName}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                placeholder="Enter client name"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
                 required
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-gray-600 text-sm mb-1">Client Email</label>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Client Email</label>
               <input
                 type="email"
                 name="clientEmail"
                 value={form.clientEmail}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                placeholder="Enter client email"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-gray-600 text-sm mb-1">Amount (₹)</label>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Amount (₹)</label>
               <input
                 type="number"
                 name="amount"
                 value={form.amount}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                placeholder="Enter amount"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
                 required
               />
             </div>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Currency</label>
+              <select
+                name="currency"
+                value={form.currency}
+                onChange={handleChange}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
+              >
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="AED">AED (د.إ)</option>
+              </select>
+            </div>
 
-            <div className="mb-4">
-              <label className="block text-gray-600 text-sm mb-1">Due Date</label>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Due Date</label>
               <input
                 type="date"
                 name="dueDate"
                 value={form.dueDate}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
                 required
               />
             </div>
 
             {isEdit && (
-              <div className="mb-4">
-                <label className="block text-gray-600 text-sm mb-1">Status</label>
+              <div className="mb-5">
+                <label className="block text-slate-600 text-sm font-medium mb-2">Status</label>
                 <select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
                 >
                   <option value="PENDING">PENDING</option>
                   <option value="PAID">PAID</option>
@@ -138,12 +191,20 @@ const InvoiceForm = () => {
               </div>
             )}
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-            >
-              {isEdit ? 'Update Invoice' : 'Create Invoice'}
-            </button>
+            <div className="flex gap-3 mt-8">
+              <button
+                type="submit"
+                className="flex-1 bg-[#1E3A5F] text-white py-3 rounded-xl hover:bg-[#162d4a] font-medium transition"
+              >
+                {isEdit ? 'Update Invoice' : 'Create Invoice'}
+              </button>
+              <Link
+                to="/invoices"
+                className="flex-1 border border-slate-200 text-slate-600 py-3 rounded-xl hover:bg-slate-50 font-medium transition text-center"
+              >
+                Cancel
+              </Link>
+            </div>
           </form>
         </div>
       </div>

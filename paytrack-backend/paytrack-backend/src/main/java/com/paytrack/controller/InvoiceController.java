@@ -41,6 +41,7 @@ public class InvoiceController {
         invoice.setClientEmail(dto.getClientEmail());
         invoice.setAmount(dto.getAmount());
         invoice.setDueDate(dto.getDueDate());
+        invoice.setCurrency(dto.getCurrency() != null ? dto.getCurrency() : "INR");
         return ResponseEntity.ok(invoiceService.create(invoice));
     }
 

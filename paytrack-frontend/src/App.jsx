@@ -7,15 +7,17 @@ import InvoiceList from './pages/InvoiceList'
 import InvoiceForm from './pages/InvoiceForm'
 import InvoiceDetail from './pages/InvoiceDetail'
 import Profile from './pages/Profile'
+import Landing from './pages/Landing'
+import Docs from './pages/Docs'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<h1>Landing Page</h1>} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/docs" element={<h1>Docs Page</h1>} />
+        <Route path="/docs" element={<Docs />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
