@@ -9,14 +9,15 @@ const InvoiceForm = () => {
   const isEdit = !!id
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({
-    clientName: '',
-    clientEmail: '',
-    amount: '',
-    dueDate: '',
-    status: 'PENDING',
-    currency: 'INR'
-  })
+ const [form, setForm] = useState({
+  clientName: '',
+  clientEmail: '',
+  amount: '',
+  dueDate: '',
+  status: 'PENDING',
+  currency: 'INR',
+  advanceAmount: ''
+})
   const [error, setError] = useState('')
 
   const handleLogout = () => {
@@ -146,6 +147,21 @@ const InvoiceForm = () => {
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
                 required
               />
+            </div>
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">
+                Advance Amount (Optional)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  name="advanceAmount"
+                  value={form.advanceAmount}
+                  onChange={handleChange}
+                  placeholder="Enter advance amount if any"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
+                />
+              </div>
             </div>
             <div className="mb-5">
               <label className="block text-slate-600 text-sm font-medium mb-2">Currency</label>

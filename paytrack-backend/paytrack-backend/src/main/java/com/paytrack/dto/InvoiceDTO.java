@@ -12,4 +12,5 @@ public class InvoiceDTO {
     private LocalDate dueDate;
     private String status;
     private String currency;
+    private BigDecimal advanceAmount;
 }

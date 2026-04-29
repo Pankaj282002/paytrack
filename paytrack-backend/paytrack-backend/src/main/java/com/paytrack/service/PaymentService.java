@@ -18,17 +18,33 @@ public class PaymentService {
     private final InvoiceRepository invoiceRepository;
 
     public Payment add(Payment payment) {
-        Payment saved = paymentRepository.save(payment);
-
-        // Auto status update
         Invoice invoice = payment.getInvoice();
-        List<Payment> payments = paymentRepository.findByInvoiceId(invoice.getId());
 
-        BigDecimal totalPaid = payments.stream()
+        // Existing payments calculate karo
+        List<Payment> existingPayments = paymentRepository.findByInvoiceId(invoice.getId());
+        BigDecimal alreadyPaid = existingPayments.stream()
                 .map(Payment::getPaidAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (totalPaid.compareTo(invoice.getAmount()) >= 0) {
+        BigDecimal advance = invoice.getAdvanceAmount() != null ? invoice.getAdvanceAmount() : BigDecimal.ZERO;
+        BigDecimal totalAlreadyPaid = alreadyPaid.add(advance);
+        BigDecimal remaining = invoice.getAmount().subtract(totalAlreadyPaid);
+
+        // Cap payment at remaining amount
+        if (payment.getPaidAmount().compareTo(remaining) > 0) {
+            payment.setPaidAmount(remaining);
+        }
+
+        // remaining is 0 then don't save payment
+        if (remaining.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Invoice is already fully paid");
+        }
+
+        Payment saved = paymentRepository.save(payment);
+
+        // Recalculate total after save
+        BigDecimal newTotal = totalAlreadyPaid.add(saved.getPaidAmount());
+        if (newTotal.compareTo(invoice.getAmount()) >= 0) {
             invoice.setStatus(Invoice.Status.PAID);
         } else {
             invoice.setStatus(Invoice.Status.PENDING);

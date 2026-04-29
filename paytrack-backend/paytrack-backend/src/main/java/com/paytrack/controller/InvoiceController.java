@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -42,6 +43,7 @@ public class InvoiceController {
         invoice.setAmount(dto.getAmount());
         invoice.setDueDate(dto.getDueDate());
         invoice.setCurrency(dto.getCurrency() != null ? dto.getCurrency() : "INR");
+        invoice.setAdvanceAmount(dto.getAdvanceAmount() != null ? dto.getAdvanceAmount() : BigDecimal.ZERO);
         return ResponseEntity.ok(invoiceService.create(invoice));
     }
 

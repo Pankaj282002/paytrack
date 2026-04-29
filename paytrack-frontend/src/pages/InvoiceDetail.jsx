@@ -4,13 +4,19 @@ import { FileText, CreditCard, Pencil, Plus, LogOut, User, LayoutDashboard, Chec
 import api from '../services/api'
 import { removeToken } from '../services/auth'
 
+const getCurrencySymbol = (currency) => {
+  if (currency === 'USD') return '$'
+  if (currency === 'EUR') return '€'
+  if (currency === 'GBP') return '£'
+  if (currency === 'AED') return 'د.إ'
+  return '₹'
+}
+
 const InvoiceDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [invoice, setInvoice] = useState(null)
   const [payments, setPayments] = useState([])
-  const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.paidAmount), 0)
-const remaining = parseFloat(invoice?.amount || 0) - totalPaid
   const [showForm, setShowForm] = useState(false)
   const [paymentForm, setPaymentForm] = useState({
     paidAmount: '',
@@ -35,13 +41,31 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
 
   const handlePaymentSubmit = async (e) => {
     e.preventDefault()
+
+    // Validation — overpayment check
+    const enteredAmount = parseFloat(paymentForm.paidAmount)
+    if (enteredAmount > remaining) {
+      alert(`Payment amount cannot exceed remaining amount of ${symbol}${remaining.toFixed(2)}`)
+      return
+    }
+
+    if (enteredAmount <= 0) {
+      alert('Payment amount must be greater than 0')
+      return
+    }
+
     try {
       const res = await api.post(`/invoices/${id}/payments`, paymentForm)
-      setPayments([...payments, res.data])
+      const updatedPayments = [...payments, res.data]
+      setPayments(updatedPayments)
       setShowForm(false)
       setPaymentForm({ paidAmount: '', paidDate: '', paymentMode: 'UPI', note: '' })
+
+      // Refresh invoice
+      const invoiceRes = await api.get(`/invoices/${id}`)
+      setInvoice(invoiceRes.data)
     } catch (err) {
-      alert('Failed to add payment')
+      alert(err.response?.data?.message || 'Failed to add payment')
     }
   }
 
@@ -58,11 +82,15 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
     </div>
   )
 
+  const symbol = getCurrencySymbol(invoice.currency)
+  const totalPaid = payments.reduce((sum, p) => sum + Math.round(parseFloat(p.paidAmount) * 100), 0) / 100
+  const advanceAmount = Math.round(parseFloat(invoice.advanceAmount || 0) * 100) / 100
+  const totalPaidWithAdvance = Math.round((totalPaid + advanceAmount) * 100) / 100
+  const remaining = Math.round((parseFloat(invoice.amount || 0) - totalPaidWithAdvance) * 100) / 100
   const statusConfig = getStatusConfig(invoice.status)
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Navbar */}
       <nav className="bg-[#1E3A5F] px-8 py-4 flex justify-between items-center shadow-lg">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center">
@@ -94,7 +122,6 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
       </nav>
 
       <div className="max-w-4xl mx-auto p-8">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[#1E3A5F]">Invoice #{invoice.id}</h1>
@@ -109,7 +136,6 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
           </Link>
         </div>
 
-        {/* Invoice Info Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 mb-6">
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -126,32 +152,20 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
           <div className="grid grid-cols-3 gap-6 pt-6 border-t border-slate-100">
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Total Amount</p>
-              <p className="text-2xl font-bold text-[#1E3A5F]">
-                {invoice.currency === 'USD' ? '$' :
-                  invoice.currency === 'EUR' ? '€' :
-                    invoice.currency === 'GBP' ? '£' :
-                      invoice.currency === 'AED' ? 'د.إ' : '₹'}
-                {invoice.amount}
-              </p>
+              <p className="text-2xl font-bold text-[#1E3A5F]">{symbol}{invoice.amount}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Advance Paid</p>
+              <p className="text-2xl font-bold text-blue-600">{symbol}{advanceAmount.toFixed(2)}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Total Paid</p>
-              <p className="text-2xl font-bold text-emerald-600">
-                {invoice.currency === 'USD' ? '$' :
-                  invoice.currency === 'EUR' ? '€' :
-                    invoice.currency === 'GBP' ? '£' :
-                      invoice.currency === 'AED' ? 'د.إ' : '₹'}
-                {totalPaid.toFixed(2)}
-              </p>
+              <p className="text-2xl font-bold text-emerald-600">{symbol}{totalPaidWithAdvance.toFixed(2)}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Remaining</p>
               <p className={`text-2xl font-bold ${remaining <= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                {invoice.currency === 'USD' ? '$' :
-                  invoice.currency === 'EUR' ? '€' :
-                    invoice.currency === 'GBP' ? '£' :
-                      invoice.currency === 'AED' ? 'د.إ' : '₹'}
-                {remaining.toFixed(2)}
+                {symbol}{remaining.toFixed(2)}
               </p>
             </div>
             <div>
@@ -162,38 +176,32 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
               <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Currency</p>
               <p className="text-lg font-semibold text-slate-700">{invoice.currency}</p>
             </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Created</p>
-              <p className="text-lg font-semibold text-slate-700">
-                {new Date(invoice.createdAt).toLocaleDateString()}
-              </p>
-            </div>
           </div>
         </div>
 
-        {/* Payments Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-lg font-semibold text-[#1E3A5F]">Payment History</h2>
               <p className="text-slate-400 text-sm">{payments.length} payment(s) recorded</p>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="bg-emerald-500 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-600 flex items-center gap-2 text-sm font-medium transition"
-            >
-              <Plus size={15} />
-              Add Payment
-            </button>
+            {invoice.status !== 'PAID' && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-emerald-500 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-600 flex items-center gap-2 text-sm font-medium transition"
+              >
+                <Plus size={15} />
+                Add Payment
+              </button>
+            )}
           </div>
 
-          {/* Add Payment Form */}
           {showForm && (
             <form onSubmit={handlePaymentSubmit} className="bg-slate-50 rounded-xl p-6 mb-6 border border-slate-100">
               <h3 className="font-medium text-[#1E3A5F] mb-4">New Payment</h3>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">Amount (₹)</label>
+                  <label className="block text-slate-600 text-sm font-medium mb-2">Amount ({symbol})</label>
                   <input
                     type="number"
                     value={paymentForm.paidAmount}
@@ -254,7 +262,6 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
             </form>
           )}
 
-          {/* Payment List */}
           {payments.length === 0 ? (
             <div className="text-center py-12">
               <CreditCard size={40} className="mx-auto mb-3 text-slate-300" />
@@ -273,14 +280,14 @@ const remaining = parseFloat(invoice?.amount || 0) - totalPaid
               <tbody>
                 {payments.map(payment => (
                   <tr key={payment.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td className="py-3 font-semibold text-emerald-600">₹{payment.paidAmount}</td>
+                    <td className="py-3 font-semibold text-emerald-600">{symbol}{payment.paidAmount}</td>
                     <td className="py-3 text-slate-500">{payment.paidDate}</td>
                     <td className="py-3">
                       <span className="bg-blue-50 text-[#1E3A5F] px-2 py-1 rounded-lg text-xs font-medium">
                         {payment.paymentMode}
                       </span>
                     </td>
-                    <td className="py-3 text-slate-400">{payment.note || '—'}</td>
+                    <td className="py-3 text-slate-400">{payment.note || '-'}</td>
                   </tr>
                 ))}
               </tbody>

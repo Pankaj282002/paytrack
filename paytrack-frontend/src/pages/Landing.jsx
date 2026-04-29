@@ -207,10 +207,24 @@ const Landing = () => {
             <Link to="/docs" className="hover:text-white transition">Docs</Link>
             <Link to="/login" className="hover:text-white transition">Login</Link>
             <Link to="/register" className="hover:text-white transition">Register</Link>
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLScMcsJ1JLsIpfMalbNVNIIpTZOfV1lid4yz1f7QUA0QT0wGhg/viewform"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-emerald-400 transition font-medium"
+            >
+              Feedback
+            </a>
+            <a
+              href="https://github.com/Pankaj282002/paytrack/issues"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-emerald-400 transition font-medium"
+            >
+              Report a Bug
+            </a>
           </div>
-          <p className="text-blue-300 text-sm">
-            Built with Spring Boot & React
-          </p>
+          <p className="text-blue-300 text-sm">Built with Spring Boot & React</p>
         </div>
       </footer>
     </div>

@@ -45,6 +45,9 @@ public class Invoice {
     @Column(name = "currency")
     private String currency = "INR";
 
+    @Column(name = "advance_amount")
+    private BigDecimal advanceAmount = BigDecimal.ZERO;
+
     @JsonIgnore
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<Payment> payments;
