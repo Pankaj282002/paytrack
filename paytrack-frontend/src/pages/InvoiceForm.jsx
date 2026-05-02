@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { FileText, LogOut, User, LayoutDashboard } from 'lucide-react'
+import { FileText, User, BookOpen } from 'lucide-react'
 import api from '../services/api'
-import { removeToken } from '../services/auth'
+import Navbar from '../components/Navbar'
 
 const InvoiceForm = () => {
   const { id } = useParams()
   const isEdit = !!id
   const navigate = useNavigate()
 
- const [form, setForm] = useState({
-  clientName: '',
-  clientEmail: '',
-  amount: '',
-  dueDate: '',
-  status: 'PENDING',
-  currency: 'INR',
-  advanceAmount: ''
-})
+  const [form, setForm] = useState({
+    clientName: '',
+    clientEmail: '',
+    amount: '',
+    dueDate: '',
+    status: 'PENDING',
+    currency: 'INR',
+    advanceAmount: ''
+  })
   const [error, setError] = useState('')
 
-  const handleLogout = () => {
-    removeToken()
-    navigate('/login')
-  }
+  const navLinks = [
+    { to: '/dashboard', label: 'Dashboard', icon: <FileText size={15} /> },
+    { to: '/invoices', label: 'Invoices', icon: <FileText size={15} /> },
+    { to: '/profile', label: 'Profile', icon: <User size={15} /> },
+  ]
 
   useEffect(() => {
     if (isEdit) {
@@ -35,7 +36,9 @@ const InvoiceForm = () => {
             clientEmail: inv.clientEmail,
             amount: inv.amount,
             dueDate: inv.dueDate,
-            status: inv.status
+            status: inv.status,
+            currency: inv.currency || 'INR',
+            advanceAmount: inv.advanceAmount || ''
           })
         })
         .catch(() => navigate('/invoices'))
@@ -62,40 +65,11 @@ const InvoiceForm = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Navbar */}
-      <nav className="bg-[#1E3A5F] px-8 py-4 flex justify-between items-center shadow-lg">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center">
-            <FileText size={15} className="text-[#1E3A5F]" />
-          </div>
-          <span className="text-white font-bold text-lg">PayTrack</span>
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link to="/dashboard" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
-            <LayoutDashboard size={15} />
-            Dashboard
-          </Link>
-          <Link to="/invoices" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
-            <FileText size={15} />
-            Invoices
-          </Link>
-          <Link to="/profile" className="text-blue-200 hover:text-white text-sm flex items-center gap-1 transition">
-            <User size={15} />
-            Profile
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="text-blue-200 hover:text-red-400 text-sm flex items-center gap-1 transition"
-          >
-            <LogOut size={15} />
-            Logout
-          </button>
-        </div>
-      </nav>
+      <Navbar links={navLinks} />
 
-      <div className="max-w-2xl mx-auto p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#1E3A5F]">
+      <div className="max-w-2xl mx-auto p-4 md:p-8">
+        <div className="mb-6">
+          <h1 className="text-xl md:text-2xl font-bold text-[#1E3A5F]">
             {isEdit ? 'Edit Invoice' : 'Create Invoice'}
           </h1>
           <p className="text-slate-500 text-sm mt-1">
@@ -109,7 +83,7 @@ const InvoiceForm = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-slate-600 text-sm font-medium mb-2">Client Name</label>
@@ -137,7 +111,7 @@ const InvoiceForm = () => {
             </div>
 
             <div className="mb-5">
-              <label className="block text-slate-600 text-sm font-medium mb-2">Amount (₹)</label>
+              <label className="block text-slate-600 text-sm font-medium mb-2">Amount</label>
               <input
                 type="number"
                 name="amount"
@@ -148,21 +122,7 @@ const InvoiceForm = () => {
                 required
               />
             </div>
-            <div className="mb-5">
-              <label className="block text-slate-600 text-sm font-medium mb-2">
-                Advance Amount (Optional)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  name="advanceAmount"
-                  value={form.advanceAmount}
-                  onChange={handleChange}
-                  placeholder="Enter advance amount if any"
-                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
-                />
-              </div>
-            </div>
+
             <div className="mb-5">
               <label className="block text-slate-600 text-sm font-medium mb-2">Currency</label>
               <select
@@ -177,6 +137,18 @@ const InvoiceForm = () => {
                 <option value="GBP">GBP (£)</option>
                 <option value="AED">AED (د.إ)</option>
               </select>
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-slate-600 text-sm font-medium mb-2">Advance Amount (Optional)</label>
+              <input
+                type="number"
+                name="advanceAmount"
+                value={form.advanceAmount}
+                onChange={handleChange}
+                placeholder="Enter advance amount if any"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F] transition"
+              />
             </div>
 
             <div className="mb-5">
@@ -207,7 +179,7 @@ const InvoiceForm = () => {
               </div>
             )}
 
-            <div className="flex gap-3 mt-8">
+            <div className="flex gap-3 mt-6">
               <button
                 type="submit"
                 className="flex-1 bg-[#1E3A5F] text-white py-3 rounded-xl hover:bg-[#162d4a] font-medium transition"
