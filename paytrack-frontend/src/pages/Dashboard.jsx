@@ -126,7 +126,13 @@ const Dashboard = () => {
                   {summary.recentInvoices.map(invoice => (
                     <tr key={invoice.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
                       <td className="px-4 md:px-6 py-3 font-medium text-slate-700">{invoice.clientName}</td>
-                      <td className="px-4 md:px-6 py-3 font-semibold text-[#1E3A5F]">₹{invoice.amount}</td>
+                      <td className="px-4 md:px-6 py-3 font-semibold text-[#1E3A5F]">
+                        {invoice.currency === 'USD' ? '$' :
+                          invoice.currency === 'EUR' ? '€' :
+                            invoice.currency === 'GBP' ? '£' :
+                              invoice.currency === 'AED' ? 'د.إ' : '₹'}
+                        {invoice.amount}
+                      </td>
                       <td className="hidden md:table-cell px-6 py-3 text-slate-500">{invoice.dueDate}</td>
                       <td className="px-4 md:px-6 py-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusClass(invoice.status)}`}>
